@@ -3,9 +3,21 @@ import os.path
 from activation import activation_functions
 from model import layers_types
 from optimizer import optimizer_functions
+from dataclasses import dataclass
+
+@dataclass
+class Options:
+    activation: str
+    optimizer: str
+    data_path: str
+    epochs: int
+    layers: str
+    train_size: float
+    output_cols: int
+    learning_rate: float
 
 
-def parse_flags():
+def parse_flags() -> Options:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -44,6 +56,13 @@ def parse_flags():
         choices=layers_types.keys(),
         help="Choose from predetermined layers (default - in, 50, 50, out)"
     )
+    
+    parser.add_argument(
+        '--train-size',
+        type=float,
+        default=0.8,
+        help="Fraction of data used for training (0.8 = 80%)"
+    )
 
     parser.add_argument(
         '--output-cols',
@@ -73,7 +92,9 @@ def parse_flags():
         raise argparse.ArgumentTypeError(
             "Only one of 'optimizer','activation' and 'layers' flags can be set to all at a time")
 
-    return args
+    opt = Options(args.activation, args.optimizer,args.data,args.epochs, args.layers, args.train_size, args.output_cols, args.lr)
+
+    return opt
 
 
 def data_type(value):
