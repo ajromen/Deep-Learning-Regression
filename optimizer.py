@@ -5,3 +5,4 @@ optimizer_functions = {
     "adam": None,
     "all": None
 }
+

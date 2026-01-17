@@ -30,9 +30,9 @@ def create_models(opt: Options)-> list[Model]:
     input_size = number_of_cols - opt.output_cols
     output_size = opt.output_cols
     
-    activation = activation_functions.get(opt.activation)
-    optimizer = optimizer_functions.get(opt.optimizer)
-    layers = opt.layers
+    activation = activation_functions[opt.activation]
+    optimizer = optimizer_functions[opt.optimizer]
+    layers = layers_types[opt.layers]
     
     
     if opt.activation=='all':

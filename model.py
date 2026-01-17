@@ -12,7 +12,7 @@ layers_types: dict[str, list[int]|None] = {
 }
 
 class Model:
-    def __init__(self, data: np.ndarray, train_size: float, input_size: int, output_size: int, learning_rate: float, epochs: int, layers_sizes: str, optimizer, activation):
+    def __init__(self, data: np.ndarray, train_size: float, input_size: int, output_size: int, learning_rate: float, epochs: int, layers_sizes, optimizer, activation):
         self.data = data
         self.train_size = train_size
         self.learning_rate = learning_rate
@@ -22,11 +22,7 @@ class Model:
         self.optimizer = optimizer
         self.activation = activation
         
-        
-        tmp  = layers_types[layers_sizes]
-        if tmp is None:
-            tmp = []
-        self.layers_sizes = tmp
+        self.layers_sizes = layers_sizes
         self.layers_sizes.append(output_size)
         self.layers_sizes.insert(0,input_size)
         
@@ -36,8 +32,14 @@ class Model:
     def _split_train_test(self):
         n = len(self.data)
         split_idx = int(n * self.train_size)
-        self.train_data = self.data[:split_idx]
-        self.test_data = self.data[split_idx:]
+        train = self.data[:split_idx]
+        test = self.data[split_idx:]
+        
+        self.x_train = train[:, :-self.output_size]
+        self.y_train = train[:, -self.output_size:]
+
+        self.x_test = test[:, :-self.output_size]
+        self.y_test = test[:, -self.output_size:]
         
     def _create_layers(self):
         layers = []
@@ -46,16 +48,20 @@ class Model:
             layers.append(
                 Layer(self.layers_sizes[i],self.layers_sizes[i+1], self.activation)
             )
+        self.layers: list[Layer] = layers
         
     def run(self):
         for _ in range(self.epochs):
-            self.forward_pass()
+            y_hat = self.forward_pass()
             self.backward_pass()
             self.get_loss()
             self.update_params()
     
     def forward_pass(self):
-        pass
+        X = self.x_train
+        for layer in self.layers:
+            X = layer.forward(X)
+        return X
     
     def get_loss(self):
         pass
