@@ -40,7 +40,7 @@ def create_models(opt: Options) -> list[Model]:
                 continue
             name = opt.optimizer + '_' + k + '_' + str(layers)
             models.append(
-                Model(data, opt.train_size, input_size, output_size, opt.learning_rate, opt.epochs, layers, optimizer,
+                Model(data, opt.train_size, input_size, output_size, opt.learning_rate, opt.epochs, opt.layers, optimizer,
                       v, name))
 
     elif opt.optimizer == 'all':
@@ -48,7 +48,7 @@ def create_models(opt: Options) -> list[Model]:
             if k == 'all':
                 continue
             name = k + '_' + opt.activation + '_' + str(layers)
-            models.append(Model(data, opt.train_size, input_size, output_size, opt.learning_rate, opt.epochs, layers, v,
+            models.append(Model(data, opt.train_size, input_size, output_size, opt.learning_rate, opt.epochs, opt.layers, v,
                                 activation, name))
 
     elif opt.layers == 'all':
@@ -63,7 +63,7 @@ def create_models(opt: Options) -> list[Model]:
     else:
         name = opt.optimizer + '_' + opt.activation + '_' + str(layers)
         models.append(
-            Model(data, opt.train_size, input_size, output_size, opt.learning_rate, opt.epochs, layers, optimizer,
+            Model(data, opt.train_size, input_size, output_size, opt.learning_rate, opt.epochs, opt.layers, optimizer,
                   activation, name))
 
     return models
