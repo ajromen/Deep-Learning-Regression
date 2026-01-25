@@ -1,8 +1,6 @@
 import argparse
 import os.path
-from activation import activation_functions
-from model import layers_types
-from optimizer import optimizer_functions
+from options import activation_functions, layers_types, optimizer_functions
 from dataclasses import dataclass
 
 @dataclass
@@ -15,6 +13,13 @@ class Options:
     train_size: float
     output_cols: int
     learning_rate: float
+
+
+def data_type(value):
+    value = value.strip()
+    if not os.path.exists(value):
+        raise argparse.ArgumentTypeError("Path does not exist")
+    return value
 
 
 def parse_flags() -> Options:
@@ -61,7 +66,7 @@ def parse_flags() -> Options:
         '--train-size',
         type=float,
         default=0.8,
-        help="Fraction of data used for training (0.8 = 80%)"
+        help="Fraction of data used for training (0.8 = 80%%)"
     )
 
     parser.add_argument(
@@ -95,10 +100,3 @@ def parse_flags() -> Options:
     opt = Options(args.activation, args.optimizer,args.data,args.epochs, args.layers, args.train_size, args.output_cols, args.lr)
 
     return opt
-
-
-def data_type(value):
-    value = value.strip()
-    if not os.path.exists(value):
-        raise argparse.ArgumentTypeError("Path does not exist")
-    return value
