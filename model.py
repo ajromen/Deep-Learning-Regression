@@ -1,6 +1,7 @@
 from encodings import latin_1
 import numpy as np
 
+import activation as act
 import options
 from layer import Layer
 from lsloss import LSLoss
@@ -8,10 +9,10 @@ from optimizers.optimizer import Optimizer
 
 
 class Model:
-    def __init__(self, data: np.ndarray, train_size: float, input_size: int, output_size: int, learning_rate: float,
-                 epochs: int, layers_sizes, optimizer, activation, name: str = ""):
-        self.data = data
-        self.train_size = train_size
+    def __init__(self, train_data: np.ndarray, test_data: np.ndarray,  input_size: int, output_size: int, learning_rate: float,
+                 epochs: int, layers_sizes, optimizer, activation, batch_size: int = 32, name: str = ""):
+        self.train_data = train_data
+        self.test_data = test_data
         self.learning_rate = learning_rate
         self.input_size = input_size
         self.output_size = output_size
@@ -21,21 +22,18 @@ class Model:
         self.layers_sizes = [input_size] + options.layers_types[layers_sizes] + [output_size]
         self.loss = LSLoss()
         self.name = name
+        self.batch_size = batch_size
 
         self._split_train_test()
         self._create_layers()
 
     def _split_train_test(self):
-        n = len(self.data)
-        split_idx = int(n * self.train_size)
-        train = self.data[:split_idx]
-        test = self.data[split_idx:]
 
-        self.x_train = train[:, :-self.output_size]
-        self.y_train = train[:, -self.output_size:]
+        self.x_train = self.train_data[:, :-self.output_size]
+        self.y_train = self.train_data[:, -self.output_size:]
 
-        self.x_test = test[:, :-self.output_size]
-        self.y_test = test[:, -self.output_size:]
+        self.x_test = self.test_data[:, :-self.output_size]
+        self.y_test = self.test_data[:, -self.output_size:]
 
     def _create_layers(self):
         layers = []
@@ -45,14 +43,29 @@ class Model:
             )
         self.layers: list[Layer] = layers
 
+        # poslednji ne bi trebao da ima activation? mozda
+        # self.layers[-1].activation = act.identity
+        # self.layers[-1].activation_derivative = act.identity_derivative
+
+    def _run_batches(self, X, Y):
+        n = X.shape[0]
+        indices = np.random.permutation(n)
+
+        for start in range(0, n, self.batch_size):
+            end = start + self.batch_size
+            batch_idx = indices[start:end]
+            yield X[batch_idx], Y[batch_idx]
+
     def run(self):
         X = self.x_train
         Y = self.y_train
-        for _ in range(self.epochs):
-            y_hat = self.forward_pass(X)
-            loss = self.loss.calculate_loss(y_hat, Y)
-            self.backward_pass(y_hat, Y)
-            self.update_params()
+        for i in range(self.epochs):
+            for Xb, Yb in self._run_batches(X, Y):
+                y_hat = self.forward_pass(Xb)
+                self.backward_pass(y_hat, Yb)
+                self.update_params()
+            if i%1000==0:
+                print("\tLoss at iteration "+str(i)+". "+str(self.test()))
 
     def forward_pass(self, X):
         for layer in self.layers:
@@ -65,6 +78,7 @@ class Model:
             grad = layer.backward(grad)
 
     def update_params(self):
+
         for layer in self.layers:
             self.optimizer.step(layer)
 

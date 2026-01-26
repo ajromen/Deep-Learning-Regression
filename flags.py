@@ -4,7 +4,7 @@ from options import activation_functions, layers_types, optimizer_functions
 from dataclasses import dataclass
 
 @dataclass
-class Options:
+class Flags:
     activation: str
     optimizer: str
     data_path: str
@@ -13,6 +13,9 @@ class Options:
     train_size: float
     output_cols: int
     learning_rate: float
+    batch_size: int
+    verbose: bool
+    visualise: bool
 
 
 def data_type(value):
@@ -22,7 +25,7 @@ def data_type(value):
     return value
 
 
-def parse_flags() -> Options:
+def parse_flags() -> Flags:
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -56,6 +59,15 @@ def parse_flags() -> Options:
     )
 
     parser.add_argument(
+        "-bs", "--batch-size",
+        default=100,
+        metavar="N",
+        type=int,
+        help="Size of batches"
+    )
+
+
+    parser.add_argument(
         '-l', "--layers",
         default="default",
         choices=layers_types.keys(),
@@ -85,6 +97,22 @@ def parse_flags() -> Options:
         help="Learning rate"
     )
 
+    parser.add_argument(
+        "-v", "--verbose",
+        default=False,
+        metavar="BOOL",
+        type=bool,
+        help="Verbose output"
+    )
+
+    parser.add_argument(
+        "--visualise",
+        default=True,
+        metavar="BOOL",
+        type=bool,
+        help="Show graphs"
+    )
+
     args = parser.parse_args()
 
     # check if multiple flags are set to 'all'
@@ -97,6 +125,6 @@ def parse_flags() -> Options:
         raise argparse.ArgumentTypeError(
             "Only one of 'optimizer','activation' and 'layers' flags can be set to all at a time")
 
-    opt = Options(args.activation, args.optimizer,args.data,args.epochs, args.layers, args.train_size, args.output_cols, args.lr)
+    flags = Flags(args.activation, args.optimizer,args.data,args.epochs, args.layers, args.train_size, args.output_cols, args.lr, args.batch_size, args.verbose, args.visualise)
 
-    return opt
+    return flags

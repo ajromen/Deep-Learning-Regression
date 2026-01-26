@@ -21,6 +21,7 @@ class Layer:
 
     def backward(self, dA):
         dZ = dA * self.activation_derivative(self.Z)
-        self.dW = self.X.T @ dZ
-        self.db = np.sum(dZ, axis=0, keepdims=True)
+        m = self.X.shape[0]
+        self.dW = (self.X.T @ dZ) / m
+        self.db = np.sum(dZ, axis=0, keepdims=True) / m
         return dZ @ self.W.T
