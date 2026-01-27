@@ -10,7 +10,7 @@ from optimizers.optimizer import Optimizer
 
 class Model:
     def __init__(self, train_data: np.ndarray, test_data: np.ndarray,  input_size: int, output_size: int, learning_rate: float,
-                 epochs: int, layers_sizes, optimizer, activation, batch_size: int = 32, name: str = ""):
+                 epochs: int, layers_sizes, optimizer, activation, batch_size: int = 32, name: str = "", c_names =""):
         self.train_data = train_data
         self.test_data = test_data
         self.learning_rate = learning_rate
@@ -23,6 +23,7 @@ class Model:
         self.loss = LSLoss()
         self.name = name
         self.batch_size = batch_size
+        self.c_names = c_names
 
         self._split_train_test()
         self._create_layers()

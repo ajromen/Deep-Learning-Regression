@@ -19,7 +19,8 @@ def main():
 
     df = pd.read_csv(flags.data_path)
     data = df.to_numpy()
-    models: List[Model] = create_models(flags, data)
+    columns = df.columns
+    models: List[Model] = create_models(flags, data, columns)
 
     verbose = flags.verbose
 
@@ -49,13 +50,13 @@ def main():
             model.name,
             f"{loss_before:.4f}",
             f"{loss_after:.4f}",
-            f"{improvement:.4f}"
-            f"{training_time:.4f}"
+            f"{improvement:.4f}",
+            f"{training_time:.2f}s"
         ])
 
     columns = ["", "Model name", "Loss before", "Loss after", "Improvement", "Training time"]
     print("\nTraining Summary:")
-    print(tabulate(res, headers=columns, tablefmt='simple_grid', numalign="right"))
+    print(tabulate(res, headers=columns, tablefmt='simple_grid', numalign="right",stralign="right"))
 
     if not flags.visualise: return
 
@@ -69,7 +70,7 @@ def main():
         visualize_models(models, data)
 
 
-def create_models(f: Flags, data):
+def create_models(f: Flags, data, c_names):
     models = []
 
     np.random.shuffle(data)
@@ -96,7 +97,7 @@ def create_models(f: Flags, data):
             models.append(
                 Model(train, test, input_size, output_size, f.learning_rate, f.epochs, f.layers,
                       optimizer,
-                      v, name=name, batch_size=f.batch_size))
+                      v, name=name, batch_size=f.batch_size, c_names=c_names))
 
     elif f.optimizer == 'all':
         for k, v in optimizer_functions.items():
@@ -105,7 +106,7 @@ def create_models(f: Flags, data):
             name = k + '_' + f.activation + '_' + str(layers)
             models.append(
                 Model(train, test, input_size, output_size, f.learning_rate, f.epochs, f.layers, v,
-                      activation, name=name, batch_size=f.batch_size))
+                      activation, name=name, batch_size=f.batch_size, c_names=c_names))
 
     elif f.layers == 'all':
         for k, v in layers_types.items():
@@ -114,13 +115,13 @@ def create_models(f: Flags, data):
             name = f.optimizer + '_' + f.activation + '_' + str(v)
             models.append(
                 Model(train, test, input_size, output_size, f.learning_rate, f.epochs, k, optimizer,
-                      activation, name=name, batch_size=f.batch_size))
+                      activation, name=name, batch_size=f.batch_size, c_names=c_names))
 
     else:
         name = f.optimizer + '_' + f.activation + '_' + str(layers)
         models.append(
             Model(train, test, input_size, output_size, f.learning_rate, f.epochs, f.layers, optimizer,
-                  activation, name=name, batch_size=f.batch_size))
+                  activation, name=name, batch_size=f.batch_size, c_names=c_names))
 
     return models
 
