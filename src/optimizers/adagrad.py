@@ -1,7 +1,7 @@
 import numpy as np
 
-from layer import Layer
-from optimizers.optimizer import Optimizer
+from src.model.model import Layer
+from src.optimizers.optimizer import Optimizer
 
 
 class Adagrad(Optimizer):

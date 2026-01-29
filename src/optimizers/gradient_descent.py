@@ -1,7 +1,5 @@
-from typing import override
-
-from layer import Layer
-from optimizers.optimizer import Optimizer
+from src.model.model import Layer
+from src.optimizers.optimizer import Optimizer
 
 
 class GradientDescent(Optimizer):

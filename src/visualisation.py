@@ -1,6 +1,5 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.axes import Axes
 
 
 def get_subplot_layout(choice: str):
@@ -14,6 +13,17 @@ def get_subplot_layout(choice: str):
         return 1, 1
     else:
         raise ValueError("Unknown comparison type")
+
+def visualise(models, flags, data):
+    if not flags.visualise: return
+    if flags.activation == "all":
+        visualize_models(models, data, mode="activation")
+    elif flags.layers == "all":
+        visualize_models(models, data, mode="layers")
+    elif flags.optimizer == "all":
+        visualize_models(models, data, mode="optimizer")
+    else:
+        visualize_models(models, data)
 
 
 def visualize_models(models, data, mode: str = 'single'):

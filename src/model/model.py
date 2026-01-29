@@ -1,16 +1,15 @@
 from encodings import latin_1
 import numpy as np
 
-import activation as act
-import options
-from layer import Layer
-from lsloss import LSLoss
-from optimizers.optimizer import Optimizer
+from src.model import options
+from src.model.layer import Layer
+from src.model.lsloss import LSLoss
+from src.optimizers.optimizer import Optimizer
 
 
 class Model:
     def __init__(self, train_data: np.ndarray, test_data: np.ndarray,  input_size: int, output_size: int, learning_rate: float,
-                 epochs: int, layers_sizes, optimizer, activation, batch_size: int = 32, name: str = "", c_names =""):
+                 epochs: int, layers_sizes, optimizer, activation, batch_size: int = 32, name: str = "", c_names ="",verbose = False):
         self.train_data = train_data
         self.test_data = test_data
         self.learning_rate = learning_rate
@@ -24,6 +23,7 @@ class Model:
         self.name = name
         self.batch_size = batch_size
         self.c_names = c_names
+        self.verbose = False
 
         self._split_train_test()
         self._create_layers()
@@ -65,7 +65,7 @@ class Model:
                 y_hat = self.forward_pass(Xb)
                 self.backward_pass(y_hat, Yb)
                 self.update_params()
-            if i%1000==0:
+            if i%1000==0 and self.verbose:
                 print("\tLoss at iteration "+str(i)+". "+str(self.test()))
 
     def forward_pass(self, X):

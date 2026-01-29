@@ -1,6 +1,6 @@
 import argparse
 import os.path
-from options import activation_functions, layers_types, optimizer_functions
+from src.model.options import activation_functions, layers_types, optimizer_functions
 from dataclasses import dataclass
 
 @dataclass
@@ -77,6 +77,7 @@ def parse_flags() -> Flags:
     parser.add_argument(
         '--train-size',
         type=float,
+        metavar="FLOAT",
         default=0.8,
         help="Fraction of data used for training (0.8 = 80%%)"
     )

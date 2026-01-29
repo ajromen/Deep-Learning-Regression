@@ -1,5 +1,5 @@
-from layer import Layer
-from abc import ABC, abstractmethod
+from src.model.model import Layer
+from abc import abstractmethod
 
 
 class Optimizer:

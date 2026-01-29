@@ -1,8 +1,8 @@
-from activation import *
-from optimizers.adagrad import Adagrad
-from optimizers.adam import Adam
-from optimizers.gradient_descent import GradientDescent
-from optimizers.rmsprop import RMSProp
+from src.model.activation import *
+from src.optimizers.adagrad import Adagrad
+from src.optimizers.adam import Adam
+from src.optimizers.gradient_descent import GradientDescent
+from src.optimizers.rmsprop import RMSProp
 
 optimizer_functions = {
     "gradient": GradientDescent,

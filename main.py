@@ -1,130 +1,41 @@
 import time
 from typing import List
 
-import numpy as np
-from pandas import DataFrame
 from tabulate import tabulate
-
-from flags import parse_flags
+from src.flags import parse_flags
 import pandas as pd
-from flags import Flags
-
-from model import Model
-from options import activation_functions, layers_types, optimizer_functions
-from visualisation import visualize_models
-
+from src.model.model import Model
+from src.model import model_factory
+from src.visualisation import visualise
 
 def main():
     flags = parse_flags()
 
-    df = pd.read_csv(flags.data_path)
-    data = df.to_numpy()
+    df, data = read_input_data(flags.data_path)
+
     columns = df.columns
-    models: List[Model] = create_models(flags, data, columns)
+    models: List[Model] = model_factory.create_models(flags, data, columns)
 
     verbose = flags.verbose
 
-    print(f"Epochs: {flags.epochs}")
+    result = model_factory.train_models(models, verbose)
+    print_summary(result, flags.epochs, df)
+
+    visualise(models, flags, data)
+
+def read_input_data(path: str):
+    df = pd.read_csv(path)
+    data = df.to_numpy()
+    return df, data
+
+def print_summary(res, epochs, df):
+    print(f"Epochs: {epochs}")
     print("Data Preview:")
-
     print(tabulate(df.head(3), headers='keys', tablefmt='simple_grid'))
-
-    res = []
-    for i, model in enumerate(models):
-        if verbose:
-            print(model.name + " started")
-
-        t0 = time.time()
-        loss_before = model.test()
-        model.run()
-        loss_after = model.test()
-        improvement = loss_before - loss_after
-        t1 = time.time()
-        training_time = (t1 - t0)
-
-        if verbose:
-            print(model.name + " finished, improvement: " + str(improvement) + ", time: " + str(training_time))
-
-        res.append([
-            i + 1,
-            model.name,
-            f"{loss_before:.4f}",
-            f"{loss_after:.4f}",
-            f"{improvement:.4f}",
-            f"{training_time:.2f}s"
-        ])
 
     columns = ["", "Model name", "Loss before", "Loss after", "Improvement", "Training time"]
     print("\nTraining Summary:")
-    print(tabulate(res, headers=columns, tablefmt='simple_grid', numalign="right",stralign="right"))
-
-    if not flags.visualise: return
-
-    if flags.activation == "all":
-        visualize_models(models, data, mode="activation")
-    elif flags.layers == "all":
-        visualize_models(models, data, mode="layers")
-    elif flags.optimizer == "all":
-        visualize_models(models, data, mode="optimizer")
-    else:
-        visualize_models(models, data)
-
-
-def create_models(f: Flags, data, c_names):
-    models = []
-
-    np.random.shuffle(data)
-
-    number_of_cols = data.shape[1]
-    input_size = number_of_cols - f.output_cols
-    output_size = f.output_cols
-
-    activation = activation_functions[f.activation]
-    optimizer = optimizer_functions[f.optimizer]
-    layers = layers_types[f.layers]
-
-    # da bi moglo da se uporedi moraju da se uzmu isti podaci za treniranje
-    n = len(data)
-    split_idx = int(n * f.train_size)
-    train = data[:split_idx]
-    test = data[split_idx:]
-
-    if f.activation == 'all':
-        for k, v in activation_functions.items():
-            if k == 'all':
-                continue
-            name = f.optimizer + '_' + k + '_' + str(layers)
-            models.append(
-                Model(train, test, input_size, output_size, f.learning_rate, f.epochs, f.layers,
-                      optimizer,
-                      v, name=name, batch_size=f.batch_size, c_names=c_names))
-
-    elif f.optimizer == 'all':
-        for k, v in optimizer_functions.items():
-            if k == 'all':
-                continue
-            name = k + '_' + f.activation + '_' + str(layers)
-            models.append(
-                Model(train, test, input_size, output_size, f.learning_rate, f.epochs, f.layers, v,
-                      activation, name=name, batch_size=f.batch_size, c_names=c_names))
-
-    elif f.layers == 'all':
-        for k, v in layers_types.items():
-            if k == 'all':
-                continue
-            name = f.optimizer + '_' + f.activation + '_' + str(v)
-            models.append(
-                Model(train, test, input_size, output_size, f.learning_rate, f.epochs, k, optimizer,
-                      activation, name=name, batch_size=f.batch_size, c_names=c_names))
-
-    else:
-        name = f.optimizer + '_' + f.activation + '_' + str(layers)
-        models.append(
-            Model(train, test, input_size, output_size, f.learning_rate, f.epochs, f.layers, optimizer,
-                  activation, name=name, batch_size=f.batch_size, c_names=c_names))
-
-    return models
-
+    print(tabulate(res, headers=columns, tablefmt='simple_grid', numalign="right", stralign="right"))
 
 if __name__ == "__main__":
     main()
