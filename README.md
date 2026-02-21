@@ -44,11 +44,11 @@ options:
   -v, --verbose BOOL    Verbose output
   --visualise BOOL      Show graphs
 ```
-*note: only one from options, activation and layers can be set to 'all' at a time.
+*note: only one out of: options, activation and layers can be set to 'all' at a time.
 
 ---
 ## Results
-The model generates grid of plots and prints summary to standard output. 
+The program generates a grid of plots and prints the summary to the standard output. 
 
 
 <details>
